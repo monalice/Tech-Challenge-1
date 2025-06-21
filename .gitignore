@@ -192,3 +192,8 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+#  data is a directory that contains data files used by the project. It is recommended to
+#  ignore this directory to avoid committing large data files or sensitive information.
+data/*
+*.csv

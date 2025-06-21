@@ -1,3 +1,5 @@
 fastapi
 pandas
 uvicorn
+requests
+bs4
