@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from src.routes import router as books_router
+import sys
+import os
+import logging
 
 app = FastAPI(
     title="API Pública de Consulta de Livros",
@@ -8,5 +11,18 @@ app = FastAPI(
     docs_url="/api/v1/docs",
     redoc_url="/api/v1/redoc"
 )
+
+@app.on_event("startup")
+def run_scraper_on_startup():
+    try:
+        script_dir = os.path.join(os.path.dirname(__file__), "script")
+        if script_dir not in sys.path:
+            sys.path.insert(0, script_dir)
+        from script.scraper_books import scrape_all_books, save_books_csv
+        books = scrape_all_books()
+        save_books_csv(books)
+        logging.getLogger("uvicorn.error").info("Scraper executado com sucesso no startup.")
+    except Exception as e:
+        logging.getLogger("uvicorn.error").error(f"Erro ao executar scraper no startup: {e}")
 
 app.include_router(books_router)

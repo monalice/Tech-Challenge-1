@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-BOOKS_CSV_PATH = os.path.join(os.path.dirname(__file__), 'data', 'books.csv')
+BOOKS_CSV_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'books.csv')
 
 def load_books_df():
     try:
