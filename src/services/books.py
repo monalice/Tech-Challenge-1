@@ -1,8 +1,8 @@
 import logging
 from typing import List, Optional
 from fastapi import HTTPException, status
-from ..models import Book
-from ..database import load_books_df
+from ..models.book import Book
+from .database import load_books_df
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -56,15 +56,39 @@ def search_books_service(title: Optional[str] = None, category: Optional[str] = 
 def get_book_by_id_service(book_id: int) -> Book:
     logger.info(f"Buscando livro por ID: {book_id}")
     df = get_books_df()
-    if book_id not in df.index and (not (df['id'] == book_id).any()):
+    filtered = df[df['id'] == book_id]
+    if filtered.empty:
         logger.error(f'Livro com ID {book_id} não encontrado.')
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Livro com ID "{book_id}" não encontrado.')
-    if book_id in df.index:
-        row = df.loc[book_id]
-    else:
-        row = df[df['id'] == book_id].iloc[0]
+    row = filtered.iloc[0]
     row_dict = row.to_dict()
     row_dict['id'] = int(book_id)
     row_dict = {str(k): v for k, v in row_dict.items()}
     logger.debug(f"Livro encontrado: {row_dict}")
     return Book(**row_dict)
+
+def get_top_rated_books(limit: int = 10) -> List[Book]:
+    logger.info(f"Listando os {limit} livros com melhor avaliação.")
+    df = get_books_df()
+    top_books = df.sort_values(by="rating", ascending=False).head(limit)
+    result = []
+    for idx, row in top_books.iterrows():
+        row_dict = row.to_dict()
+        row_dict['id'] = get_int_idx(idx) if 'id' not in row_dict else row_dict['id']
+        row_dict = {str(k): v for k, v in row_dict.items()}
+        result.append(Book(**row_dict))
+    logger.debug(f"Top-rated retornados: {len(result)}")
+    return result
+
+def get_books_by_price_range(min_price: float, max_price: float, limit: int = 100) -> List[Book]:
+    logger.info(f"Filtrando livros por faixa de preço: min={min_price}, max={max_price}")
+    df = get_books_df()
+    filtered = df[(df['price'] >= min_price) & (df['price'] <= max_price)].head(limit)
+    result = []
+    for idx, row in filtered.iterrows():
+        row_dict = row.to_dict()
+        row_dict['id'] = get_int_idx(idx) if 'id' not in row_dict else row_dict['id']
+        row_dict = {str(k): v for k, v in row_dict.items()}
+        result.append(Book(**row_dict))
+    logger.debug(f"Livros na faixa retornados: {len(result)}")
+    return result

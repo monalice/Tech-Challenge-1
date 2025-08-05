@@ -12,7 +12,7 @@ CSV_PATH = "data/books.csv"
 
 
 def get_category_name(soup: BeautifulSoup) -> str:
-    breadcrumb = soup.select(".breadcrumb li a")
+    breadcrumb = soup.select(".breadcrumb li li")
     if len(breadcrumb) >= 2:
         return breadcrumb[-1].text.strip()
     h1 = soup.select_one(".page-header h1")
