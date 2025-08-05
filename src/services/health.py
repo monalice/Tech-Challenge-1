@@ -1,6 +1,6 @@
 import logging
 from fastapi import HTTPException, status
-from ..database import load_books_df
+from .database import load_books_df
 
 logger = logging.getLogger("uvicorn.error")
 
