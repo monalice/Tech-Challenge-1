@@ -1,5 +1,5 @@
 import logging
-from scraper_utils import fetch_page, parse_book, get_category_links
+from script.scraper_utils import fetch_page, parse_book, get_category_links
 from typing import List, Dict
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
@@ -23,6 +23,13 @@ def get_category_name(soup: BeautifulSoup) -> str:
 
 
 def scrape_all_books() -> List[Dict]:
+    logger.info("Verificando se a base de dado ja esta preenchida...")
+    db: Session = SessionLocal()
+    if db.query(BookORM).count() > 0:
+        if db.query(BookORM).count() >= 1000:
+            logger.info("Base de dados ja preenchida com mais de 1000 livros. Abortando scraping.")
+            db.close()
+            return []
     logger.info("Iniciando scraping de todas as categorias...")
     main_soup = fetch_page(BASE_URL)
     if not main_soup:
@@ -70,7 +77,6 @@ def save_books_db(books: List[Dict]):
         return
     db: Session = SessionLocal()
     try:
-        # Remove todos os livros existentes antes de inserir novos (opcional)
         db.query(BookORM).delete()
         db.commit()
         objs = [BookORM(**{k: v for k, v in book.items() if k in BookORM.__table__.columns.keys()}) for book in books]
