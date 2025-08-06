@@ -18,9 +18,11 @@ def run_scraper_on_startup():
         script_dir = os.path.join(os.path.dirname(__file__), "script")
         if script_dir not in sys.path:
             sys.path.insert(0, script_dir)
-        from script.scraper_books import scrape_all_books, save_books_csv
+        from src.db.init_db import init_db
+        init_db()
+        from script.scraper_books import scrape_all_books, save_books_db
         books = scrape_all_books()
-        save_books_csv(books)
+        save_books_db(books)
         logging.getLogger("uvicorn.error").info("Scraper executado com sucesso no startup.")
     except Exception as e:
         logging.getLogger("uvicorn.error").error(f"Erro ao executar scraper no startup: {e}")

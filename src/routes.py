@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
+from sqlalchemy.orm import Session
 from typing import List, Optional
 from .models.book import Book
 from .services.books import (
@@ -7,6 +8,7 @@ from .services.books import (
     get_book_by_id_service,
     get_top_rated_books,
     get_books_by_price_range,
+    get_db
 )
 from .services.categories import list_categories_service
 from .services.health import health_check_service
@@ -19,7 +21,8 @@ router = APIRouter()
     summary="Verifica a saúde da API"
 )
 async def health_check():
-    return health_check_service()
+    db: Session = Depends(get_db)
+    return health_check_service(db=db)
 
 
 @router.get(
@@ -37,8 +40,9 @@ async def get_all_books(
     offset: int = Query(
         0, ge=0, description="Número de livros a pular (para paginação, padrão: 0)."
     ),
+    db: Session = Depends(get_db)
 ):
-    return list_books(limit=limit, offset=offset)
+    return list_books(db=db, limit=limit, offset=offset)
 
 
 @router.get(
@@ -51,8 +55,9 @@ async def search_books(
         None, description="Título (parcial ou exato) do livro para buscar."
     ),
     category: Optional[str] = Query(None, description="Categoria do livro para buscar."),
+    db: Session = Depends(get_db)
 ):
-    return search_books_service(title=title, category=category)
+    return search_books_service(db=db, title=title, category=category)
 
 
 @router.get(
@@ -61,7 +66,8 @@ async def search_books(
     summary="Lista os livros com melhor avaliação",
 )
 async def get_top_rated_books_route(limit: int = Query(10, ge=1, le=100)):
-    return get_top_rated_books(limit)
+    db: Session = Depends(get_db)
+    return get_top_rated_books(db=db, limit=limit)
 
 
 @router.get(
@@ -70,9 +76,10 @@ async def get_top_rated_books_route(limit: int = Query(10, ge=1, le=100)):
     summary="Filtra livros por faixa de preço",
 )
 async def get_books_by_price_range_route(
-    min: float = Query(0.0, ge=0.0, le=100), max: float = Query(10.0, ge=1.0, le=1000.0), limit: int = Query(10, ge=1, le=100)
+    min: float = Query(0.0, ge=0.0, le=100), max: float = Query(10.0, ge=1.0, le=1000.0), limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db)
 ):
-    return get_books_by_price_range(min_price=min, max_price=max, limit=limit)
+    return get_books_by_price_range(db=db, min_price=min, max_price=max, limit=limit)
 
 
 @router.get(
@@ -81,7 +88,8 @@ async def get_books_by_price_range_route(
     summary="Obtém detalhes de um livro por ID",
 )
 async def get_book_by_id(book_id: int):
-    return get_book_by_id_service(book_id)
+    db: Session = Depends(get_db)
+    return get_book_by_id_service(db=db, book_id=book_id)
 
 
 @router.get(

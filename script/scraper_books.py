@@ -1,14 +1,15 @@
-import csv
 import logging
 from scraper_utils import fetch_page, parse_book, get_category_links
 from typing import List, Dict
 from bs4 import BeautifulSoup
+from sqlalchemy.orm import Session
+from src.db.db import SessionLocal
+from src.models.book_orm import BookORM
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("scraper")
 
 BASE_URL = "http://books.toscrape.com/"
-CSV_PATH = "data/books.csv"
 
 
 def get_category_name(soup: BeautifulSoup) -> str:
@@ -63,20 +64,25 @@ def scrape_all_books() -> List[Dict]:
     logger.info(f"Total de livros extraídos: {len(all_books)}")
     return all_books
 
-
-def save_books_csv(books: List[Dict], path: str = CSV_PATH):
+def save_books_db(books: List[Dict]):
     if not books:
-        logger.warning("Nenhum livro para salvar.")
+        logger.warning("Nenhum livro para salvar no banco.")
         return
-    fieldnames = ["id", "title", "price", "rating", "availability", "category", "image_url"]
-    with open(path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        for book in books:
-            writer.writerow(book)
-    logger.info(f"Dados salvos em {path}")
-
+    db: Session = SessionLocal()
+    try:
+        # Remove todos os livros existentes antes de inserir novos (opcional)
+        db.query(BookORM).delete()
+        db.commit()
+        objs = [BookORM(**{k: v for k, v in book.items() if k in BookORM.__table__.columns.keys()}) for book in books]
+        db.bulk_save_objects(objs)
+        db.commit()
+        logger.info(f"{len(books)} livros salvos no banco de dados.")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Erro ao salvar livros no banco: {e}")
+    finally:
+        db.close()
 
 if __name__ == "__main__":
     books = scrape_all_books()
-    save_books_csv(books)
+    save_books_db(books)
