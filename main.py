@@ -14,9 +14,6 @@ async def lifespan(app: FastAPI):
     from src.db.init_db import init_db
     init_db()
     try:
-        script_dir = os.path.join(os.path.dirname(__file__), "script")
-        if script_dir not in sys.path:
-            sys.path.insert(0, script_dir)
         from script.scraper_books import scrape_all_books, save_books_db
         books = scrape_all_books()
         if books:

@@ -7,4 +7,7 @@ router = APIRouter(prefix="/api/v1/categories", tags=["categories"])
 
 @router.get("/", summary="Lista todas as categorias de livros únicas")
 async def get_all_categories(db: Session = Depends(get_db)):
-    return {"categories": list_categories_service(db)}
+    categories = list_categories_service(db)
+    if not categories:
+        return {"count": 0, "categories": []}
+    return {"count": len(categories), "categories": categories}

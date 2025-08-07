@@ -37,15 +37,6 @@ def search_books_service(db: Session, title: Optional[str] = None, category: Opt
     logger.debug(f"Livros encontrados: {len(result)}")
     return result
 
-def get_book_by_id_service(db: Session, book_id: int) -> Book:
-    logger.info(f"Buscando livro por ID: {book_id}")
-    book = db.query(BookORM).filter(BookORM.id == book_id).first()
-    if not book:
-        logger.error(f'Livro com ID {book_id} não encontrado.')
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Livro com ID "{book_id}" não encontrado.')
-    logger.debug(f"Livro encontrado: {book.__dict__}")
-    return Book(**book.__dict__)
-
 def get_top_rated_books(db: Session, limit: int = 10) -> List[Book]:
     logger.info(f"Listando os {limit} livros com melhor avaliação.")
     books = db.query(BookORM).order_by(BookORM.rating.desc()).limit(limit).all()
@@ -59,3 +50,12 @@ def get_books_by_price_range(db: Session, min_price: float, max_price: float, li
     result = [Book(**book.__dict__) for book in books]
     logger.debug(f"Livros na faixa retornados: {len(result)}")
     return result
+
+def get_book_by_id_service(db: Session, book_id: int) -> Book:
+    logger.info(f"Buscando livro por ID: {book_id}")
+    book = db.query(BookORM).filter(BookORM.id == book_id).first()
+    if not book:
+        logger.error(f'Livro com ID {book_id} não encontrado.')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Livro com ID "{book_id}" não encontrado.')
+    logger.debug(f"Livro encontrado: {book.__dict__}")
+    return Book(**book.__dict__)
