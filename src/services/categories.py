@@ -1,22 +1,16 @@
 import logging
-from typing import List
-from fastapi import HTTPException, status
-from .database import load_books_df
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+from src.models.book_orm import BookORM
 
 logger = logging.getLogger("uvicorn.error")
 
-def get_books_df():
-    df = load_books_df()
-    if 'id' not in df.columns:
-        df = df.reset_index()
-    if df.empty:
-        logger.error('DataFrame de livros está vazio.')
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail='Dados dos livros não disponíveis.')
-    return df
-
-def list_categories_service() -> List[str]:
-    logger.info("Listando categorias únicas de livros.")
-    df = get_books_df()
-    categories = sorted(df['category'].dropna().unique().tolist())
-    logger.debug(f"Categorias encontradas: {categories}")
-    return categories
+def list_categories_service(db: Session) -> list[str]:
+    try:
+        logger.info("Listando categorias únicas de livros.")
+        categories = db.query(BookORM.category).distinct().all()
+        categories = sorted([c[0] for c in categories if c[0]])
+        logger.debug(f"Categorias encontradas: {categories}")
+        return categories
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao acessar banco: {e}")
