@@ -115,6 +115,7 @@ Crie um arquivo `.env` na raiz do projeto e preenche-lo com o modelo já existen
 
 ### Opção 1: Docker (Recomendado)
 
+
 ```bash
 # Construir e executar os containers
 docker-compose up --build
