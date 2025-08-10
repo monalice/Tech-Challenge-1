@@ -27,7 +27,8 @@ O projeto implementa uma API completa para consulta de livros com as seguintes c
 
 ## 🏗️ Arquitetura
 
-A arquitetura do sistema segue o padrão de camadas bem definidas:
+A arquitetura do sistema segue o padrão de camadas bem definidas.
+Além do diagrama abaixo, o plano arquitetural pode ser acessado em [Plano Arquitetural](https://docs.google.com/document/d/1Fq5yAo2G2wR5sPdnzCS7yubVXqXuCiIqjnrK0Pxo37k/edit?usp=sharing).
 
 ```text
 ┌─────────────────────┐      ┌──────────────────┐      ┌─────────────────────┐
@@ -144,6 +145,12 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ### Acessos:
 
+#### 🌐 **Produção (Render):**
+- **API**: https://tech-challenge-1-a0ab.onrender.com
+- **Documentação Swagger**: https://tech-challenge-1-a0ab.onrender.com/api/v1/docs
+- **Documentação ReDoc**: https://tech-challenge-1-a0ab.onrender.com/api/v1/redoc
+
+#### 💻 **Desenvolvimento Local:**
 - **API**: http://localhost:8000
 - **Documentação Swagger**: http://localhost:8000/api/v1/docs
 - **Documentação ReDoc**: http://localhost:8000/api/v1/redoc
@@ -174,10 +181,17 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## 📖 Exemplos de Uso
 
+> **📌 Nota:** Os exemplos abaixo usam `localhost:8000` para desenvolvimento local. 
+> Para produção, substitua por: `https://tech-challenge-1-a0ab.onrender.com`
+
 ### 1. Health Check
 
 ```bash
+# Desenvolvimento
 curl -X GET "http://localhost:8000/api/v1/health"
+
+# Produção  
+curl -X GET "https://tech-challenge-1-a0ab.onrender.com/api/v1/health"
 ```
 
 **Resposta:**
