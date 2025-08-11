@@ -11,7 +11,6 @@ Esta é uma API RESTful desenvolvida com FastAPI para consulta de dados de livro
 - [Execução do Projeto](#-execução-do-projeto)
 - [Documentação da API](#-documentação-da-api)
 - [Exemplos de Uso](#-exemplos-de-uso)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
 
 ## 🎯 Descrição do Projeto
 
